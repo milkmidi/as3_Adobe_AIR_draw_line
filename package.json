@@ -1,0 +1,44 @@
+{
+  "name": "milkmidi-webpack-example",
+  "version": "1.0.0",
+  "description": "webpack example 07",
+  "main": "app.js",
+  "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server --progress --hot --devtool eval-source-map",
+    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack --progress -p"
+  },
+  "author": "milkmidi",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack-dev-server": "^2.5.1"
+  },
+  "dependencies": {
+    "babel-core": "^6.22.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^7.1.1",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "cross-env": "^5.0.0",
+    "css-loader": "^0.28.4",
+    "eslint": "^4.3.0",
+    "eslint-config-airbnb-base": "^11.3.1",
+    "eslint-import-resolver-webpack": "^0.8.3",
+    "eslint-plugin-import": "^2.7.0",
+    "extract-loader": "^0.1.0",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^0.11.1",
+    "html-loader": "^0.4.4",
+    "html-webpack-plugin": "^2.28.0",
+    "img-loader": "^2.0.0",
+    "lodash": "^4.17.4",
+    "node-sass": "^4.4.0",
+    "pug": "^2.0.0-rc.2",
+    "pug-html-loader": "^1.1.5",
+    "pug-loader": "^2.3.0",
+    "raw-loader": "^0.5.1",
+    "sass-loader": "^6.0.5",
+    "style-loader": "^0.18.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^3.1.0"
+  }
+}

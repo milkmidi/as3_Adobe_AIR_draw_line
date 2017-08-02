@@ -1,0 +1,22 @@
+html, body, .app {
+  width:100%;
+  height:100%;
+}
+canvas{
+  display: none;
+  width: 100%;
+}
+.app{  
+  .card{
+    width: 400px;
+  }
+}
+
+body.game{
+  .app{
+    display: none !important;
+  }
+  canvas{
+    display: block;
+  }
+}
