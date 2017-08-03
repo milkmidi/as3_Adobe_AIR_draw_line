@@ -15,6 +15,7 @@ module.exports = {
   globals: {
     PIXI: false,
     TweenMax: false,
+    device: false,
   },
   rules: {
     'no-mixed-operators': 0,

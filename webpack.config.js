@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const ENV = process.env.NODE_ENV || 'development';
@@ -22,10 +21,9 @@ module.exports = {
     app: ['./js/app.js'],
   },
   output: {
-    // https://webpack.js.org/configuration/output/
-    filename: toFilename('app'),
+    filename: toFilename('js/[name]'),
     path: path.resolve(__dirname, 'dist'),
-    publicPath: DEV_MODE ? 'http://localhost:8080/' : '',
+    publicPath: '',
   },
   resolve: {
     modules: [
@@ -103,5 +101,10 @@ module.exports = {
     stats: {
       chunks: false,
     },
+    host: '0.0.0.0',
+    disableHostCheck: true,
+  },
+  externals: {
+    'pixi.js': 'PIXI',
   },
 };

@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server --progress --hot --devtool eval-source-map",
-    "build": "cross-env NODE_ENV=production ./node_modules/.bin/webpack --progress -p"
+    "build": "rimraf ./dist && cross-env NODE_ENV=production ./node_modules/.bin/webpack --progress -p"
   },
   "author": "milkmidi",
   "license": "ISC",
@@ -32,6 +32,7 @@
     "img-loader": "^2.0.0",
     "lodash": "^4.17.4",
     "node-sass": "^4.4.0",
+    "pixi.js": "^4.5.4",
     "pug": "^2.0.0-rc.2",
     "pug-html-loader": "^1.1.5",
     "pug-loader": "^2.3.0",

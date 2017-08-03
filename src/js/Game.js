@@ -1,12 +1,17 @@
-// import range from 'lodash/range';
-
-const {
+import {
   Application,
   Container,
   Graphics,
   Rectangle,
   Text,
-} = PIXI;
+} from 'pixi.js';
+
+import {
+  CLICK,
+  MOUSE_DOWN,
+  MOUSE_UP,
+  MOUSE_MOVE,
+} from './EventName';
 
 const WIDTH = 1136;
 const HEIGHT = 640;
@@ -50,29 +55,27 @@ class Line extends Container {
 }
 const round2 = (value) => {
   const r = Math.round(value);
-  return r - (r % 10);
+  return r - (r % 2);
 };
 
 class Game {
+  /** @type {Application} */
   app;
+  /** @type {Container} */
   stage;
   startPoint = {
     x: 0,
     y: 0,
     id: -1,
   }
-
   /** @type {LineData[]} */
   lineObjArr = [];
 
   /** @type {Line[]} */
   lineArr = [];
-
   isBallMoving = false;
   currentBallID = 0;
-
   constructor(count = 14) {
-    console.log(count);
     const app = new Application(WIDTH, HEIGHT, {
       backgroundColor: 0xe3e3e3,
       view: document.getElementById('canvas-wrap'),
@@ -97,11 +100,15 @@ class Game {
     this.moveBall.beginFill(0);
     this.moveBall.drawCircle(0, 0, 10);
     this.stage.addChild(this.moveBall);
-    this.createStartButton();
+    this.stage.addChild(this.createStartButton());
 
     if (DEBUG) {
       this.debugMode();
     }
+  }
+  init() {
+    console.log('start');
+    this.app.ticker.add(this.tickHandler);
   }
   debugMode() {
     console.log('Debug Mode');
@@ -123,56 +130,57 @@ class Game {
     startBTN.drawCircle(40, 40, 30);
     startBTN.endFill();
     startBTN.interactive = true;
-    startBTN.on('click', () => {
-      this.lineObjArr.sort((a, b) => a.y - b.y);
-      console.log(this.lineObjArr);
-      const index = (Math.random() * this.lineArr.length) | 0; // eslint-disable-line
-      this.currentBallID = index;
-      this.moveBall.x = this.lineArr[index].x;
-      this.isBallMoving = true;
-    });
-    this.stage.addChild(startBTN);
+    startBTN.on(CLICK, this.startMoveBallHandler);
+    return startBTN;
   }
-  start() {
-    console.log('start');
-    this.app.ticker.add((delta) => {
-      if (!this.isBallMoving) {
-        return;
+  startMoveBallHandler = () => {
+    console.log('startMoveBallHandler');
+    this.lineObjArr.sort((a, b) => a.y - b.y);
+    // console.log(this.lineObjArr);
+    let index = 0;
+    if (!DEBUG) {
+        index = (Math.random() * this.lineArr.length) | 0; // eslint-disable-line
+    }
+    this.currentBallID = index;
+    this.moveBall.x = this.lineArr[index].x;
+    this.isBallMoving = true;
+  }
+  tickHandler = () => {
+    if (!this.isBallMoving) {
+      return;
+    }
+    const ballY = Math.floor(this.moveBall.y + 1);
+    this.moveBall.y = ballY;
+    if (this.lineObjArr.length === 0) {
+      this.isBallMoving = false;
+      return;
+    }
+    const obj = this.lineObjArr[0];
+    const { id, toID, y } = obj;
+    let targetX = -1;
+    if (ballY >= y) {
+      this.moveBall.y = y;
+      if (this.currentBallID === id) {
+        targetX = this.lineArr[toID].x;
+        this.currentBallID = toID;
+      } else if (this.currentBallID === toID) {
+        targetX = this.lineArr[id].x;
+        this.currentBallID = id;
       }
-      const ballY = Math.floor(this.moveBall.y + 1);
-      this.moveBall.y = ballY;
-      if (this.lineObjArr.length === 0) {
+      this.lineObjArr.shift();
+      if (targetX !== -1) {
+        console.log(id, toID);
         this.isBallMoving = false;
-        return;
+        TweenMax.to(this.moveBall, 1, { x: targetX,
+          onComplete() { this.isBallMoving = true; },
+          onCompleteScope: this,
+        });
       }
-      const obj = this.lineObjArr[0];
-      const { id, toID, y } = obj;
-      let targetX = -1;
-      if (ballY === y) {
-        if (this.currentBallID === id) {
-          targetX = this.lineArr[toID].x;
-          this.currentBallID = toID;
-        } else if (this.currentBallID === toID) {
-          targetX = this.lineArr[id].x;
-          this.currentBallID = id;
-        }
-        this.lineObjArr.shift();
-        if (targetX !== -1) {
-          this.isBallMoving = false;
-          TweenMax.to(this.moveBall, 1, { x: targetX,
-            onComplete() { this.isBallMoving = true; },
-            onCompleteScope: this,
-          });
-        }
-      }
-    });
-  }
-  removeUnuseLineData() {
-
+    }
   }
   stageMouseupHandler = () => {
-    this.stage.off('mouseup', this.stageMouseupHandler);
-    this.stage.off('mousemove', this.stageMousemoveHandler);
+    this.stage.off(MOUSE_UP, this.stageMouseupHandler);
+    this.stage.off(MOUSE_MOVE, this.stageMousemoveHandler);
     this.lineAvator.clear();
   }
   stageMousemoveHandler = (e) => {
@@ -184,8 +192,8 @@ class Game {
   }
   startDrawMode({ x, y }, id) {
     this.startPoint = { x, y, id };
-    this.stage.on('mouseup', this.stageMouseupHandler);
-    this.stage.on('mousemove', this.stageMousemoveHandler);
+    this.stage.on(MOUSE_UP, this.stageMouseupHandler);
+    this.stage.on(MOUSE_MOVE, this.stageMousemoveHandler);
   }
 
   createBridgeLine({ x, y }, toID) {
@@ -212,15 +220,21 @@ class Game {
       const line = new Line(i, color);
       line.x = gap * (i + 1);
       line.interactive = true;
-      line.on('mousedown', (e) => {
+      line.on(MOUSE_DOWN, (e) => {
         this.startDrawMode(e.data.global, e.currentTarget.id);
       });
-      line.on('mouseup', (e) => {
+      line.on(MOUSE_UP, (e) => {
         this.createBridgeLine(e.data.global, e.currentTarget.id);
       });
+
       this.stage.addChild(line);
       this.lineArr.push(line);
     }
+  }
+
+  destroy() {
+    this.app.destroy();
+    this.app = null;
   }
 }
 

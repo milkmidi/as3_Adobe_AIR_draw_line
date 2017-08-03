@@ -12,7 +12,7 @@ const startClickHandler = () => {
   console.log('start', value);
   document.body.classList.add('game');
   const game = new Game(value / 1);
-  game.start();
+  game.init();
 };
 
 document.querySelector('button').addEventListener('click', startClickHandler);
